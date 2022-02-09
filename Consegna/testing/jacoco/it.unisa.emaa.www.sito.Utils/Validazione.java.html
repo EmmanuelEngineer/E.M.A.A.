@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Validazione.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Sito</a> &gt; <a href="index.source.html" class="el_package">it.unisa.emaa.www.sito.Utils</a> &gt; <span class="el_source">Validazione.java</span></div><h1>Validazione.java</h1><pre class="source lang-java linenums">package it.unisa.emaa.www.sito.Utils;
+
+import it.unisa.emaa.www.sito.Data.dao.ReazioneDao;
+import it.unisa.emaa.www.sito.Data.dao.UtenteDao;
+import it.unisa.emaa.www.sito.Data.entity.Reazione;
+import it.unisa.emaa.www.sito.Data.entity.Utente;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
+import java.util.regex.Pattern;
+
+
+/**
+ * Questa classe permette di usare dei metodi statici per effettuare controlli
+ * @author Alessandro Marigliano
+ */
+<span class="nc" id="L19">public class Validazione {</span>
+    public static boolean emailIsPresent(String email,UtenteDao utenteDao) throws SQLException {
+<span class="fc" id="L21">        Utente utente = utenteDao.doRetrieveByEmail(email);</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        return utente != null;</span>
+    }
+
+    /**
+     * @param username
+     * Il metodo prende come input un username.
+     * @return Il metodo ritorna true o false a seconda se l'username dato in input si trova o meno nel database.
+     */
+    public static boolean usernameIsPresent(String username,UtenteDao utenteDao) throws SQLException {
+<span class="fc" id="L31">        Utente utente = utenteDao.doRetrieveByUsername(username);</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        return utente != null;</span>
+    }
+
+    /**
+     * Il metodo controlla se una reazione nel database è presente
+     * @param email Il metodo prende in input un email
+     * @param idStoria Il metodo prende in input un id storia
+     * @return Ritorna se è presente una reazione di un utente da data email alla data storia nel database
+     */
+    public static boolean reactionIsPresent(String email,int idStoria,ReazioneDao reazioneDao) throws SQLException {
+<span class="fc" id="L42">        Reazione reazione = reazioneDao.doRetrieve(email,idStoria);</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        return reazione != null;</span>
+    }
+
+    /**
+     * @param email Il metodo prende in input una email.
+     * @return Il metodo ritorna un valore true o false a seconda se l'email data in input rispetta o meno il pattern della regex per le email.
+     */
+    public static boolean emailRegex(String email){
+<span class="fc" id="L51">        Pattern patternEmail = Pattern.compile(&quot;^[\\w!#$%&amp;'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&amp;'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$&quot;);</span>
+<span class="fc" id="L52">        return patternEmail.matcher(email).matches();</span>
+    }
+
+    /**
+     * @param password Il metodo prende in input una password.
+     * @return Il metodo ritorna un valore true o false a seconda se la password data in input rispetta o meno il pattern della regex per le password.
+     */
+    public static boolean passwordRegex(String password){
+<span class="fc" id="L60">        Pattern patternPassword = Pattern.compile(&quot;^(?=.*[a-z])(?=.*\\d)(?=.*[A-Z]).{8,16}$&quot;);</span>
+<span class="fc" id="L61">        return patternPassword.matcher(password).matches();</span>
+    }
+
+    /**
+     * Il metodo confronta due stringhe passate.
+     * @param password
+     * @param passwordTest
+     * @return Il metodo ritorna true o false a seconda se le password passate sono identiche.
+     */
+    /*
+    public static boolean passwordTest(String password,String passwordTest){
+        return password.equals(passwordTest);
+    }*/
+
+    /**
+     * Il metodo controlla che l'email passata sia di un utente registrato e che la password inserita corrisponda alla sua.
+     * @param email
+     * @param password
+     * @return Il metodo ritorna true o false a seconda se i dati sono corretti.
+     */
+    public static boolean datiCorrispondenti(String email,String username,String password,UtenteDao utenteDao) throws SQLException {
+<span class="fc" id="L82">        String hashedPassword = passwordHasher(password);</span>
+<span class="fc" id="L83">        Utente utente = utenteDao.doRetrieveByEmail(email);</span>
+<span class="pc bpc" id="L84" title="2 of 6 branches missed.">        return utente!=null &amp;&amp; hashedPassword.equals(utente.getPassword()) &amp;&amp; username.equals(utente.getUsername());</span>
+    }
+    /**
+     * Il metodo effettua l'hashing della password passata come input con l'algoritmo SHA-512.
+     * @param password
+     * @return Il metodo restituisce la password dopo che ne è stato effettuato l'hashing.
+     */
+    public static String passwordHasher(String password){
+        try {
+            // getInstance() method is called with algorithm SHA-512
+<span class="fc" id="L94">            MessageDigest md = MessageDigest.getInstance(&quot;SHA-512&quot;);</span>
+            // digest() method is called
+            // to calculate message digest of the input string
+            // returned as array of byte
+<span class="fc" id="L98">            byte[] messageDigest = md.digest(password.getBytes());</span>
+            // Convert byte array into signum representation
+<span class="fc" id="L100">            BigInteger no = new BigInteger(1, messageDigest);</span>
+            // Convert message digest into hex value
+<span class="fc" id="L102">            String hashtext = no.toString(16);</span>
+            // Add preceding 0s to make it 32 bit
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">            while (hashtext.length() &lt; 32) {</span>
+<span class="nc" id="L105">                hashtext = &quot;0&quot; + hashtext;</span>
+            }
+            // return the HashText
+<span class="fc" id="L108">            return hashtext;</span>
+        }
+        // For specifying wrong message digest algorithms
+<span class="nc" id="L111">        catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L112">            throw new RuntimeException(e);</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

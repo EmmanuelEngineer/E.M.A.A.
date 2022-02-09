@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InserisciCommento.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Sito</a> &gt; <a href="index.source.html" class="el_package">it.unisa.emaa.www.sito.Application.Storia</a> &gt; <span class="el_source">InserisciCommento.java</span></div><h1>InserisciCommento.java</h1><pre class="source lang-java linenums">package it.unisa.emaa.www.sito.Application.Storia;
+
+import it.unisa.emaa.www.sito.Data.dao.CommentoDao;
+import it.unisa.emaa.www.sito.Data.entity.Commento;
+import it.unisa.emaa.www.sito.Data.entity.Utente;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.sql.SQLException;
+
+/**
+ * Questa servlet gestisce l'inserimento di un commento relativo a una storia.
+ * L'operazione fallisce se il commento non rispetta la regola di lunghezza.
+ * @author Alessandro Marigliano
+ */
+@WebServlet(name = &quot;InserisciCommento&quot;,urlPatterns = &quot;/InserisciCommento&quot;)
+public class InserisciCommento extends HttpServlet {
+    private CommentoDao commentoDao;
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+<span class="nc" id="L27">            inserisciCommento(req,resp);</span>
+<span class="nc" id="L28">        } catch (SQLException e) {</span>
+<span class="nc" id="L29">            e.printStackTrace();</span>
+<span class="nc" id="L30">        }</span>
+<span class="nc" id="L31">    }</span>
+    public void inserisciCommento(HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException {
+<span class="fc" id="L33">        HttpSession session = req.getSession();</span>
+<span class="fc" id="L34">        Object obj = session.getAttribute(&quot;utente&quot;);</span>
+<span class="fc" id="L35">        String idStoriaString = req.getParameter(&quot;storia&quot;);</span>
+<span class="fc" id="L36">        String commento = req.getParameter(&quot;commento&quot;);</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if(obj == null){</span>
+<span class="fc" id="L38">            resp.setStatus(403);</span>
+<span class="fc" id="L39">            throw new RuntimeException(&quot;Utente non è loggato,Riprovare il login&quot;);</span>
+        }
+<span class="fc bfc" id="L41" title="All 4 branches covered.">        if(idStoriaString == null || commento == null){</span>
+<span class="fc" id="L42">            resp.setStatus(500);</span>
+<span class="fc" id="L43">            throw new RuntimeException(&quot;ID storia o commento non Presente&quot;);</span>
+        }
+
+<span class="fc" id="L46">        Utente utente = (Utente) session.getAttribute(&quot;utente&quot;);</span>
+<span class="fc" id="L47">        int idStoria = Integer.parseInt(idStoriaString);</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if(inserimentoCommento(utente.getUsername(),idStoria,commento))</span>
+<span class="fc" id="L49">            resp.sendRedirect(req.getHeader(&quot;referer&quot;));</span>
+        else {
+<span class="fc" id="L51">            resp.setStatus(500);</span>
+<span class="fc" id="L52">            throw new RuntimeException(&quot;Errore nel salvataggio del commento&quot;);</span>
+        }
+<span class="fc" id="L54">    }</span>
+    private boolean inserimentoCommento(String username,int idStoria,String contenuto) throws SQLException {
+<span class="fc bfc" id="L56" title="All 4 branches covered.">        if(contenuto.length()&lt;3||contenuto.length()&gt;100)</span>
+<span class="fc" id="L57">            return false;</span>
+<span class="fc" id="L58">        Commento commento = new Commento();</span>
+<span class="fc" id="L59">        commento.setUsername(username);</span>
+<span class="fc" id="L60">        commento.setContenuto(contenuto);</span>
+<span class="fc" id="L61">        commento.setIdStoria(idStoria);</span>
+<span class="fc" id="L62">        return commentoDao.doSave(commento);</span>
+    }
+<span class="nc" id="L64">    public InserisciCommento(){</span>
+<span class="nc" id="L65">        commentoDao = new CommentoDao();</span>
+<span class="nc" id="L66">    }</span>
+<span class="fc" id="L67">    public InserisciCommento(CommentoDao commentoDao){</span>
+<span class="fc" id="L68">        this.commentoDao = commentoDao;</span>
+<span class="fc" id="L69">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

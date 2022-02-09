@@ -1,0 +1,15 @@
+Application.StoriaTest
+Application.StoriaTest.Asincrono
+Application.UtenteTest
+Application.UtenteTest.Asincrono
+Data
+it.unisa.emaa.www.sito.Application.Storia
+it.unisa.emaa.www.sito.Application.Storia.Asincrono
+it.unisa.emaa.www.sito.Application.Utente
+it.unisa.emaa.www.sito.Application.Utente.Asincrono
+it.unisa.emaa.www.sito.Application.Utente.ModuloFIA
+it.unisa.emaa.www.sito.Data
+it.unisa.emaa.www.sito.Data.dao
+it.unisa.emaa.www.sito.Data.entity
+it.unisa.emaa.www.sito.Utils
+src.main.java

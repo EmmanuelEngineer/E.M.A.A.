@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdapterFia.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Sito</a> &gt; <a href="index.source.html" class="el_package">it.unisa.emaa.www.sito.Application.Utente.ModuloFIA</a> &gt; <span class="el_source">AdapterFia.java</span></div><h1>AdapterFia.java</h1><pre class="source lang-java linenums">package it.unisa.emaa.www.sito.Application.Utente.ModuloFIA;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import it.unisa.emaa.www.sito.Data.dao.CommentoDao;
+import it.unisa.emaa.www.sito.Data.entity.Commento;
+import it.unisa.emaa.www.sito.Data.entity.Utente;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.Socket;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+/**
+ * Questa classe viene utilizzata come adattatore per la comunicazione tra un modulo di intelligenza artificiale e il database della piattaforma.
+ * Presenta un solo metodo statico che riceve la lista di tutti i commenti presenti sulla piattaforma.
+ * Invia i commenti al modulo in formato JSON e riceve una lista commenti in formato JSON, restituita poi dal metodo.
+ * La comunicazione avviene tramite l'utilizzo di una socket.
+ * @author Alessandro Marigliano
+ */
+<span class="nc" id="L27">public class AdapterFia{</span>
+
+    public static ArrayList&lt;String&gt; utentiSpammer(ArrayList&lt;Commento&gt; commenti) throws IOException, ClassNotFoundException {
+<span class="nc" id="L30">        Gson gson = new Gson();</span>
+<span class="nc" id="L31">        String jsonCommenti = gson.toJson(commenti);</span>
+<span class="nc" id="L32">        Socket socket = new Socket(&quot;localhost&quot;,2020);</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        if(!socket.isConnected()){</span>
+<span class="nc" id="L34">            throw new RuntimeException(&quot;Connessione alla socket non riuscita&quot;);</span>
+        }
+<span class="nc" id="L36">        System.out.println(&quot;Connessione riuscita&quot;);</span>
+<span class="nc" id="L37">        PrintWriter objectOutputStream = new PrintWriter(socket.getOutputStream(),true);</span>
+<span class="nc" id="L38">        objectOutputStream.println(jsonCommenti);</span>
+<span class="nc" id="L39">        Scanner objectInputStream = new Scanner(socket.getInputStream());</span>
+<span class="nc" id="L40">        String jsonUtenti = objectInputStream.nextLine();</span>
+<span class="nc" id="L41">        socket.close();</span>
+<span class="nc" id="L42">        return gson.fromJson(jsonUtenti,new TypeToken&lt;ArrayList&lt;String&gt;&gt;(){}.getType());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

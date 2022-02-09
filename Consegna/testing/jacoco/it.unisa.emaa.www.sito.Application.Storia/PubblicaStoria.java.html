@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PubblicaStoria.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Sito</a> &gt; <a href="index.source.html" class="el_package">it.unisa.emaa.www.sito.Application.Storia</a> &gt; <span class="el_source">PubblicaStoria.java</span></div><h1>PubblicaStoria.java</h1><pre class="source lang-java linenums">package it.unisa.emaa.www.sito.Application.Storia;
+
+import it.unisa.emaa.www.sito.Data.dao.StoriaDao;
+import it.unisa.emaa.www.sito.Data.entity.Storia;
+import it.unisa.emaa.www.sito.Data.entity.Utente;
+
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.time.LocalDate;
+
+/**
+ * Quseta servlet gestisce la pubblicazione di una storia da parte di un utente.
+ * L'operazione fallisce se la storia non rispetta la regola di lunghezza.
+ * @author Alessandro Marigliano
+ */
+@WebServlet(name=&quot;PubblicaStoria&quot;,urlPatterns = &quot;/PubblicaStoria&quot;)
+public class PubblicaStoria extends HttpServlet {
+    private StoriaDao storiaDao;
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+<span class="nc" id="L29">            pubblicaStoria(req,resp);</span>
+<span class="nc" id="L30">        } catch (SQLException e) {</span>
+<span class="nc" id="L31">            e.printStackTrace();</span>
+<span class="nc" id="L32">        }</span>
+<span class="nc" id="L33">    }</span>
+    public void pubblicaStoria(HttpServletRequest req,HttpServletResponse resp) throws IOException, ServletException, SQLException {
+<span class="fc" id="L35">        HttpSession session = req.getSession();</span>
+<span class="fc" id="L36">        Utente utente = (Utente) session.getAttribute(&quot;utente&quot;);</span>
+<span class="fc" id="L37">        String storia = req.getParameter(&quot;contenuto&quot;);</span>
+<span class="fc" id="L38">        resp.getWriter().print(pubblicazioneStoria(utente.getUsername(),storia));</span>
+<span class="fc" id="L39">        resp.sendRedirect(&quot;/Sito_war_exploded/VisualizzaHome&quot;);</span>
+<span class="fc" id="L40">    }</span>
+
+    private boolean pubblicazioneStoria(String username,String contenuto) throws SQLException {
+<span class="pc bpc" id="L43" title="1 of 4 branches missed.">        if(contenuto.length()&lt;1||contenuto.length()&gt;500)</span>
+<span class="fc" id="L44">            return false;</span>
+<span class="fc" id="L45">        Storia storia = new Storia();</span>
+<span class="fc" id="L46">        storia.setContenuto(contenuto);</span>
+<span class="fc" id="L47">        storia.setUsername(username);</span>
+<span class="fc" id="L48">        storia.setNCommenti(0);</span>
+<span class="fc" id="L49">        storia.setNReazioni(0);</span>
+<span class="fc" id="L50">        storia.setDataCreazione(LocalDate.now());</span>
+<span class="fc" id="L51">        return storiaDao.doSave(storia);</span>
+    }
+<span class="nc" id="L53">    public PubblicaStoria(){</span>
+<span class="nc" id="L54">        storiaDao = new StoriaDao();</span>
+<span class="nc" id="L55">    }</span>
+<span class="fc" id="L56">    public PubblicaStoria(StoriaDao storiaDao){</span>
+<span class="fc" id="L57">        this.storiaDao = storiaDao;</span>
+<span class="fc" id="L58">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

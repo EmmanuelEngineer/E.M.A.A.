@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegistrazioneUtente.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Sito</a> &gt; <a href="index.source.html" class="el_package">it.unisa.emaa.www.sito.Application.Utente</a> &gt; <span class="el_source">RegistrazioneUtente.java</span></div><h1>RegistrazioneUtente.java</h1><pre class="source lang-java linenums">package it.unisa.emaa.www.sito.Application.Utente;
+
+import it.unisa.emaa.www.sito.Data.dao.UtenteDao;
+import it.unisa.emaa.www.sito.Data.entity.Utente;
+import it.unisa.emaa.www.sito.Utils.Validazione;
+
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.sql.SQLException;
+
+/**
+ * Questa servlet effettua la registrazione di un utente.
+ * L'operazione fallisce se:
+ * risulta che una chiave passata è già presente all'interno del database;
+ * se la password non corrisponde alla password nella conferma password;
+ * se email o password non seguono il pattern.
+ * Utilizza i metodi statici della classe Validazione.
+ * @see it.unisa.emaa.www.sito.Utils.Validazione
+ * @author Alessandro Marigliano
+ */
+@WebServlet(name = &quot;RegistraUtente&quot;,urlPatterns = &quot;/RegistraUtente&quot;)
+public class RegistrazioneUtente extends HttpServlet {
+    private UtenteDao utenteDao;
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+<span class="nc" id="L31">            registrazioneUtente(req,resp);</span>
+<span class="nc" id="L32">        } catch (SQLException e) {</span>
+<span class="nc" id="L33">            e.printStackTrace();</span>
+<span class="nc" id="L34">        }</span>
+<span class="nc" id="L35">    }</span>
+
+    public void registrazioneUtente(HttpServletRequest req,HttpServletResponse resp) throws IOException, SQLException {
+<span class="fc" id="L38">        HttpSession session = req.getSession(true);</span>
+<span class="fc" id="L39">        String username = req.getParameter(&quot;username&quot;);</span>
+<span class="fc" id="L40">        String email = req.getParameter(&quot;email&quot;);</span>
+<span class="fc" id="L41">        String password = req.getParameter(&quot;password&quot;);</span>
+<span class="fc" id="L42">        String passwordTest = req.getParameter(&quot;passwordTest&quot;);</span>
+<span class="fc" id="L43">        boolean eula = Boolean.parseBoolean(req.getParameter(&quot;eula&quot;));</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if(!controllaDati(email,password,passwordTest,username,eula)) {</span>
+<span class="fc" id="L45">            resp.setStatus(500);</span>
+<span class="fc" id="L46">            throw new RuntimeException(&quot;Dati non Corretti&quot;);</span>
+        }
+<span class="fc" id="L48">        password = Validazione.passwordHasher(password);</span>
+<span class="fc" id="L49">        Utente utente = new Utente();</span>
+<span class="fc" id="L50">        utente.setUsername(username);</span>
+<span class="fc" id="L51">        utente.setId(email.toLowerCase());</span>
+<span class="fc" id="L52">        utente.setPassword(password);</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if(!effettuaRegistrazione(utente)) {</span>
+<span class="fc" id="L54">            resp.setStatus(500);</span>
+<span class="fc" id="L55">            throw new RuntimeException(&quot;Utente già Presente&quot;);</span>
+        }
+<span class="fc" id="L57">        utente.setPassword(&quot;&quot;);</span>
+<span class="fc" id="L58">        session.setAttribute(&quot;utente&quot;,utente);</span>
+<span class="fc" id="L59">        resp.sendRedirect(&quot;./VisualizzaHome&quot;);</span>
+
+<span class="fc" id="L61">    }</span>
+    private boolean effettuaRegistrazione(Utente utente) throws SQLException {
+<span class="fc" id="L63">        return utenteDao.doSave(utente);</span>
+    }
+
+    private boolean controllaDati(String email,String password,String passwordTest,String username, boolean eula) throws SQLException {
+<span class="fc" id="L67">        boolean emailPresente = Validazione.emailIsPresent(email,utenteDao);</span>
+<span class="fc" id="L68">        boolean emailUsername = Validazione.usernameIsPresent(username,utenteDao);</span>
+<span class="fc" id="L69">        boolean emailRegex = Validazione.emailRegex(email);</span>
+<span class="fc" id="L70">        boolean passwordRegex = Validazione.passwordRegex(password);</span>
+<span class="fc" id="L71">        boolean passwordEquals = password.equals(passwordTest);</span>
+<span class="pc bpc" id="L72" title="3 of 12 branches missed.">        return !emailPresente&amp;&amp;!emailUsername&amp;&amp;emailRegex&amp;&amp;passwordRegex&amp;&amp;passwordEquals&amp;&amp;eula;</span>
+    }
+<span class="nc" id="L74">    public RegistrazioneUtente(){</span>
+<span class="nc" id="L75">        utenteDao = new UtenteDao();</span>
+<span class="nc" id="L76">    }</span>
+<span class="fc" id="L77">    public RegistrazioneUtente(UtenteDao utenteDao){</span>
+<span class="fc" id="L78">        this.utenteDao = utenteDao;</span>
+<span class="fc" id="L79">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

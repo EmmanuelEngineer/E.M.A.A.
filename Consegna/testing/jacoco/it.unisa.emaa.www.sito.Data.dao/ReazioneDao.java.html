@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReazioneDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Sito</a> &gt; <a href="index.source.html" class="el_package">it.unisa.emaa.www.sito.Data.dao</a> &gt; <span class="el_source">ReazioneDao.java</span></div><h1>ReazioneDao.java</h1><pre class="source lang-java linenums">package it.unisa.emaa.www.sito.Data.dao;
+
+import it.unisa.emaa.www.sito.Data.ConnPool;
+import it.unisa.emaa.www.sito.Data.entity.Reazione;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+/**
+ * La classe ReazioneDao è il dao dell'entità reazione la classe estende un interfaccia dao contenente i metodi da
+ * effettuare
+ * @author Antonio Scotellaro
+ */
+<span class="fc" id="L16">public class ReazioneDao implements IReazioneDao{</span>
+    /**
+     * effettua una query di selezione di ogni reazione in base all'idReazione
+     * @param idStoria
+     * @return
+     */
+    @Override
+    public List&lt;Reazione&gt; doRetrieveByStoria(int idStoria) throws SQLException {
+<span class="fc" id="L24">        Connection conn = ConnPool.getConnection();</span>
+<span class="fc" id="L25">        PreparedStatement ps = conn.prepareStatement(&quot;Select * from reazione where idStoria =?&quot;);</span>
+<span class="fc" id="L26">        ps.setInt(1,idStoria);</span>
+<span class="fc" id="L27">        ResultSet rs = ps.executeQuery();</span>
+<span class="fc" id="L28">        ArrayList&lt;Reazione&gt; list =  new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        while(rs.next()){</span>
+<span class="fc" id="L30">            Reazione reazione = new Reazione();</span>
+<span class="fc" id="L31">            reazione.setIdStoria(rs.getInt(&quot;idStoria&quot;));</span>
+<span class="fc" id="L32">            reazione.setEmailUtente(rs.getString(&quot;emailUtente&quot;));</span>
+<span class="fc" id="L33">            list.add(reazione);</span>
+<span class="fc" id="L34">        }</span>
+<span class="fc" id="L35">        rs.close();</span>
+<span class="fc" id="L36">        return list;</span>
+    }
+
+    /**
+     * effettua una query di selezione di ogni reazione in base all'emailUtente
+     * @param email
+     * @return
+     */
+    @Override
+    public List&lt;Reazione&gt; doRetrieveByEmail(String email) throws SQLException {
+<span class="fc" id="L46">        Connection conn = ConnPool.getConnection();</span>
+<span class="fc" id="L47">        PreparedStatement ps = conn.prepareStatement(&quot;Select * from reazione where emailUtente =?&quot;);</span>
+<span class="fc" id="L48">        ps.setString(1,email);</span>
+<span class="fc" id="L49">        ResultSet rs = ps.executeQuery();</span>
+<span class="fc" id="L50">        ArrayList&lt;Reazione&gt; list =  new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        while(rs.next()){</span>
+<span class="fc" id="L52">            Reazione reazione = new Reazione();</span>
+<span class="fc" id="L53">            reazione.setIdStoria(rs.getInt(&quot;idStoria&quot;));</span>
+<span class="fc" id="L54">            reazione.setEmailUtente(rs.getString(&quot;emailUtente&quot;));</span>
+<span class="fc" id="L55">            list.add(reazione);</span>
+<span class="fc" id="L56">        }</span>
+<span class="fc" id="L57">        rs.close();</span>
+<span class="fc" id="L58">        return list;</span>
+    }
+
+    /**
+     *
+     * @param email
+     * @param idStoria
+     * @return
+     */
+    @Override
+    public Reazione doRetrieve(String email,int idStoria) throws SQLException {
+<span class="fc" id="L69">        Connection conn = ConnPool.getConnection();</span>
+<span class="fc" id="L70">        PreparedStatement ps = conn.prepareStatement(&quot;Select * from reazione where emailUtente =? AND idStoria = ?&quot;);</span>
+<span class="fc" id="L71">        ps.setString(1,email);</span>
+<span class="fc" id="L72">        ps.setInt(2,idStoria);</span>
+<span class="fc" id="L73">        ResultSet rs = ps.executeQuery();</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if(!rs.isBeforeFirst())</span>
+<span class="nc" id="L75">            return null;</span>
+<span class="fc" id="L76">        rs.next();</span>
+<span class="fc" id="L77">        Reazione reazione = new Reazione();</span>
+<span class="fc" id="L78">        reazione.setIdStoria(rs.getInt(&quot;idStoria&quot;));</span>
+<span class="fc" id="L79">        reazione.setEmailUtente(rs.getString(&quot;emailUtente&quot;));</span>
+<span class="fc" id="L80">        rs.close();</span>
+<span class="fc" id="L81">        return reazione;</span>
+    }
+
+    /**
+     * salva una reazione nella base di dati
+     * @param reazione
+     * @return
+     */
+    @Override
+    public boolean doSave(Reazione reazione) throws SQLException {
+<span class="fc" id="L91">        Connection conn = ConnPool.getConnection();</span>
+<span class="fc" id="L92">        PreparedStatement ps = conn.prepareStatement(&quot;INSERT into reazione (idStoria,emailUtente) values (?,?)&quot;);</span>
+<span class="fc" id="L93">        ps.setInt(1, reazione.getIdStoria());</span>
+<span class="fc" id="L94">        ps.setString(2, reazione.getEmailUtente());</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        return ps.executeUpdate()&gt;0;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

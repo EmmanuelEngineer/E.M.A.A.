@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InserisciReazione.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Sito</a> &gt; <a href="index.source.html" class="el_package">it.unisa.emaa.www.sito.Application.Storia.Asincrono</a> &gt; <span class="el_source">InserisciReazione.java</span></div><h1>InserisciReazione.java</h1><pre class="source lang-java linenums">package it.unisa.emaa.www.sito.Application.Storia.Asincrono;
+
+import it.unisa.emaa.www.sito.Data.dao.ReazioneDao;
+import it.unisa.emaa.www.sito.Data.entity.Reazione;
+import it.unisa.emaa.www.sito.Data.entity.Utente;
+import it.unisa.emaa.www.sito.Utils.Validazione;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.sql.SQLException;
+
+/**
+ * Questa servlet gestisce l'inserimento di una reazione da parte di un utente.
+ * L'operazione fallisce se la reazione è già presente.
+ * @author Alessandro Marigliano
+ */
+@WebServlet(name = &quot;InserisciReazione&quot;,urlPatterns = &quot;/InserisciReazione&quot;)
+public class InserisciReazione extends HttpServlet {
+    private ReazioneDao reazioneDao;
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+<span class="nc" id="L28">            inserisciReazione(req,resp);</span>
+<span class="nc" id="L29">        } catch (SQLException e) {</span>
+<span class="nc" id="L30">            e.printStackTrace();</span>
+<span class="nc" id="L31">        }</span>
+<span class="nc" id="L32">    }</span>
+    public void inserisciReazione(HttpServletRequest req,HttpServletResponse resp) throws SQLException {
+<span class="fc" id="L34">        HttpSession session = req.getSession();</span>
+<span class="fc" id="L35">        Utente utente = (Utente) session.getAttribute(&quot;utente&quot;);</span>
+<span class="fc" id="L36">        int idStoria = Integer.parseInt(req.getParameter(&quot;storia&quot;));</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if(!inserimentoReazione(utente.getId(),idStoria)) {</span>
+<span class="fc" id="L38">            resp.setStatus(500);</span>
+<span class="fc" id="L39">            throw new RuntimeException(&quot;Errore nell'insermento della Reazione&quot;);</span>
+        }
+
+<span class="fc" id="L42">    }</span>
+    private boolean inserimentoReazione(String email,int idStoria) throws SQLException {
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if(Validazione.reactionIsPresent(email,idStoria,reazioneDao))</span>
+<span class="fc" id="L45">            return false;</span>
+<span class="fc" id="L46">        Reazione reazione = new Reazione();</span>
+<span class="fc" id="L47">        reazione.setIdStoria(idStoria);</span>
+<span class="fc" id="L48">        reazione.setEmailUtente(email);</span>
+<span class="fc" id="L49">        return reazioneDao.doSave(reazione);</span>
+    }
+<span class="nc" id="L51">    public InserisciReazione(){</span>
+<span class="nc" id="L52">        reazioneDao = new ReazioneDao();</span>
+<span class="nc" id="L53">    }</span>
+<span class="fc" id="L54">    public InserisciReazione(ReazioneDao reazioneDao){</span>
+<span class="fc" id="L55">        this.reazioneDao = reazioneDao;</span>
+<span class="fc" id="L56">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

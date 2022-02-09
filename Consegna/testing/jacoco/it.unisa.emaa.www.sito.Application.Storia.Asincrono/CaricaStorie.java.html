@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CaricaStorie.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Sito</a> &gt; <a href="index.source.html" class="el_package">it.unisa.emaa.www.sito.Application.Storia.Asincrono</a> &gt; <span class="el_source">CaricaStorie.java</span></div><h1>CaricaStorie.java</h1><pre class="source lang-java linenums">package it.unisa.emaa.www.sito.Application.Storia.Asincrono;
+
+import com.google.gson.Gson;
+import it.unisa.emaa.www.sito.Data.dao.ReazioneDao;
+import it.unisa.emaa.www.sito.Data.dao.StoriaDao;
+import it.unisa.emaa.www.sito.Data.entity.Storia;
+import it.unisa.emaa.www.sito.Data.entity.StoriaReazioni;
+import it.unisa.emaa.www.sito.Data.entity.Utente;
+import it.unisa.emaa.www.sito.Utils.Validazione;
+import org.eclipse.persistence.oxm.MediaType;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+/**
+ * La servlet si occupa del caricamento delle storie nella bacheca.
+ * Il caricamento viene effettuato secondo un numero di pagina per suddividere i risultati durante il caricamento.
+ * L'invio avviene trasformando gli oggetti in una stringa JSON.
+ * @author Alessandro Marigliano
+ */
+@WebServlet(name=&quot;CaricaStorie&quot; ,value=&quot;/CaricaStorie&quot; )
+public class CaricaStorie extends HttpServlet {
+    private StoriaDao storiaDao;
+    private ReazioneDao reazioneDao;
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+<span class="nc" id="L35">            caricaStorie(req,resp);</span>
+<span class="nc" id="L36">        } catch (SQLException e) {</span>
+<span class="nc" id="L37">            e.printStackTrace();</span>
+<span class="nc" id="L38">        }</span>
+<span class="nc" id="L39">    }</span>
+    public void caricaStorie(HttpServletRequest req,HttpServletResponse resp) throws IOException, SQLException {
+<span class="fc" id="L41">        HttpSession session = req.getSession();</span>
+<span class="fc" id="L42">        Object obj = session.getAttribute(&quot;utente&quot;);</span>
+<span class="fc" id="L43">        String stringPagina = req.getParameter(&quot;pagina&quot;);</span>
+<span class="pc bpc" id="L44" title="2 of 4 branches missed.">        if(obj == null || stringPagina == null){</span>
+<span class="nc" id="L45">            resp.setStatus(500);</span>
+<span class="nc" id="L46">            throw new RuntimeException(&quot;pagina o utente non passati&quot;);</span>
+        }
+<span class="fc" id="L48">        Utente utente = (Utente) obj;</span>
+<span class="fc" id="L49">        int pagina = Integer.parseInt(stringPagina);</span>
+<span class="fc" id="L50">        ArrayList&lt;StoriaReazioni&gt; storieReazioni = recuperaListaStorie(pagina,utente.getId());</span>
+<span class="fc" id="L51">        Gson gson = new Gson();</span>
+<span class="fc" id="L52">        String json = gson.toJson(storieReazioni);</span>
+<span class="fc" id="L53">        resp.setContentType(String.valueOf(MediaType.APPLICATION_JSON));</span>
+<span class="fc" id="L54">        resp.setCharacterEncoding(&quot;UTF-8&quot;);</span>
+<span class="fc" id="L55">        resp.getWriter().print(json);</span>
+
+<span class="fc" id="L57">    }</span>
+    private ArrayList&lt;StoriaReazioni&gt; recuperaListaStorie(int pagina, String email) throws SQLException {
+<span class="fc" id="L59">        ArrayList&lt;StoriaReazioni&gt; storieReazioni = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L60">        ArrayList&lt;Storia&gt; listaStorie = new ArrayList&lt;&gt;(storiaDao.doRetrieveByPage(30,pagina*30));</span>
+        boolean present;
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        for (Storia s : listaStorie) {</span>
+<span class="fc" id="L63">            StoriaReazioni storia = new StoriaReazioni();</span>
+<span class="fc" id="L64">            storia.setStoria(s);</span>
+<span class="fc" id="L65">            present = Validazione.reactionIsPresent(email, s.getId(), reazioneDao);</span>
+<span class="fc" id="L66">            storia.setReazionata(present);</span>
+<span class="fc" id="L67">            storieReazioni.add(storia);</span>
+<span class="fc" id="L68">        }</span>
+<span class="fc" id="L69">        return storieReazioni;</span>
+    }
+<span class="nc" id="L71">    public CaricaStorie(){</span>
+<span class="nc" id="L72">        storiaDao = new StoriaDao();</span>
+<span class="nc" id="L73">        reazioneDao = new ReazioneDao();</span>
+<span class="nc" id="L74">    }</span>
+<span class="fc" id="L75">    public CaricaStorie(StoriaDao storiaDao,ReazioneDao reazioneDao){</span>
+<span class="fc" id="L76">        this.storiaDao = storiaDao;</span>
+<span class="fc" id="L77">        this.reazioneDao = reazioneDao;</span>
+<span class="fc" id="L78">    }</span>
+
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
